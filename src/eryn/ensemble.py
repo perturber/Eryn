@@ -617,8 +617,20 @@ class EnsembleSampler(object):
                         "Configuration of moves has changed. Cannot use the same backend. Declare a new backend and start from the previous state. If you would prefer not to track move acceptance fraction, set track_moves to False in the EnsembleSampler."
                     )
 
-            if self.key_order != self.backend.key_order:
+            #if self.key_order != self.backend.key_order:
+            #    raise ValueError("Input key order from priors does not match backend.")
+            #if self.key_order != self.backend.key_order:
+            # raise ValueError("Input key order from priors does not match backend.")
+            # --- START FIX ---
+            # Check if keys (branch names) are the same
+            if self.key_order.keys() != self.backend.key_order.keys():
                 raise ValueError("Input key order from priors does not match backend.")
+
+            # Check if values (parameter names) are the same, handling numpy arrays correctly
+            for k in self.key_order:
+                if not np.array_equal(self.key_order[k], self.backend.key_order[k]):
+                    raise ValueError("Input key order from priors does not match backend.")
+            # --- END FIX ---
             
             # Check the backend shape
             for i, (name, shape) in enumerate(self.backend.shape.items()):
