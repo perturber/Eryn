@@ -622,12 +622,15 @@ class EnsembleSampler(object):
             #if self.key_order != self.backend.key_order:
             # raise ValueError("Input key order from priors does not match backend.")
             # --- START FIX ---
-            # Check if keys (branch names) are the same
-            if self.key_order.keys() != self.backend.key_order.keys():
+            # Filter out custom global priors since the backend only saves physical branches
+            sampler_keys = [k for k in self.key_order.keys() if k != "all_models_together"]
+            backend_keys = list(self.backend.key_order.keys())
+
+            if set(sampler_keys) != set(backend_keys):
                 raise ValueError("Input key order from priors does not match backend.")
 
             # Check if values (parameter names) are the same, handling numpy arrays correctly
-            for k in self.key_order:
+            for k in sampler_keys:
                 if not np.array_equal(self.key_order[k], self.backend.key_order[k]):
                     raise ValueError("Input key order from priors does not match backend.")
             # --- END FIX ---
